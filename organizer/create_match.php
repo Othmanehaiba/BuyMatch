@@ -47,32 +47,71 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])){
 
     
     $matchRepo = new MatchRepository();
-    $created = $matchRepo->create_match($team1_name, $team1_logo_url, $team2_name, $team2_logo_url, $date_match, $time_match, $stade_nom, $stade_ville, $total_seats);
-    if(!$created){
+
+    $matchId = $matchRepo->create_match(
+        $team1_name,
+        $team1_logo_url,
+        $team2_name,
+        $team2_logo_url,
+        $date_match,
+        $time_match,
+        $stade_nom,
+        $stade_ville,
+        (int)$total_seats
+    );
+
+    if ($matchId <= 0) {
         die("Erreur lors de la création du match.");
     }
-    $matchId = $matchRepo->getIdMatch();
-    $createdCat1 = $matchRepo->create_category($matchId, $category1_name, $category1_price, $category1_seats);
-    if(!$createdCat1){
+
+    $createdCat1 = $matchRepo->create_category(
+        (int)$matchId,
+        $category1_name,
+        (float)$category1_price,
+        (int)$category1_seats
+    );
+
+    if (!$createdCat1) {
         die("Erreur lors de la création de la catégorie 1.");
     }
-    if(!empty($category2_name)){
-        $createdCat2 = $matchRepo->create_category($matchId, $category2_name, $category2_price, $category2_seats);
-        if(!$createdCat2){
+
+    if (!empty($category2_name)) {
+        if (empty($category2_price) || empty($category2_seats)) {
+            die("Catégorie 2: prix et nombre de places sont obligatoires si tu choisis un nom.");
+        }
+
+        $createdCat2 = $matchRepo->create_category(
+            (int)$matchId,
+            $category2_name,
+            (float)$category2_price,
+            (int)$category2_seats
+        );
+
+        if (!$createdCat2) {
             die("Erreur lors de la création de la catégorie 2.");
         }
     }
-    if(!empty($category3_name)){
-        $createdCat3 = $matchRepo->create_category($matchId, $category3_name, $category3_price, $category3_seats);
-        if(!$createdCat3){
+
+    if (!empty($category3_name)) {
+        if (empty($category3_price) || empty($category3_seats)) {
+            die("Catégorie 3: prix et nombre de places sont obligatoires si tu choisis un nom.");
+        }
+
+        $createdCat3 = $matchRepo->create_category(
+            (int)$matchId,
+            $category3_name,
+            (float)$category3_price,
+            (int)$category3_seats
+        );
+
+        if (!$createdCat3) {
             die("Erreur lors de la création de la catégorie 3.");
         }
-    }            
+    }
+
     header("Location: dashboard.php");
     exit();
-    
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -192,7 +231,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])){
                 <div class="form-group">
                     <label for="category1_name">Catégorie 1 - Nom</label>
                     <select id="category1_name" name="category1_name" class="form-control">
-                        <option value="" selected>Choisir une catégorie (optionnel)</option>
+                        <option value="" selected>Choisir une catégorie</option>
                         <option value="VIP">VIP</option>
                         <option value="Premium">Premium</option>
                         <option value="Standard">Standard</option>
@@ -212,9 +251,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])){
                 <hr>
 
                 <div class="form-group">
-                    <label for="category2_name">Catégorie 2 - Nom (optionnel)</label>
+                    <label for="category2_name">Catégorie 2 - Nom</label>
                     <select id="category2_name" name="category2_name" class="form-control">
-                        <option value="" selected>Choisir une catégorie (optionnel)</option>
+                        <option value="" selected>Choisir une catégorie</option>
                         <option value="VIP">VIP</option>
                         <option value="Premium">Premium</option>
                         <option value="Standard">Standard</option>
@@ -234,9 +273,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])){
                 <hr>
 
                 <div class="form-group">
-                    <label for="category3_name">Catégorie 3 - Nom (optionnel)</label>
+                    <label for="category3_name">Catégorie 3 - Nom</label>
                     <select id="category3_name" name="category3_name" class="form-control">
-                        <option value="" selected>Choisir une catégorie (optionnel)</option>
+                        <option value="" selected>Choisir une catégorie</option>
                         <option value="VIP">VIP</option>
                         <option value="Premium">Premium</option>
                         <option value="Standard">Standard</option>

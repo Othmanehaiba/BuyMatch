@@ -3,7 +3,14 @@ session_start();
 require_once __DIR__ . "/../config/Database.php";
 require_once __DIR__ . "/../classes/MatchRepository.php";
 $matchRepo = new MatchRepository();
-$matches = $matchRepo->all();
+$stmt = $matchRepo->pdo->prepare("SELECT COUNT(*) FROM matches WHERE organisateur_id = ?");
+$stmt->execute([(int)$_SESSION['user_id']]);
+$total_matches = (int)$stmt->fetchColumn();
+
+///match en attente ////
+$stmt = $matchRepo->pdo->prepare("SELECT COUNT(*) FROM matches WHERE organisateur_id = ? AND statut = 'en_attente'");
+$stmt->execute([(int)$_SESSION['user_id']]);
+$matches_enAttente = (int)$stmt->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -34,12 +41,12 @@ $matches = $matchRepo->all();
         <!-- Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-value">12</div>
+                <div class="stat-value"><?php echo $total_matches; ?></div>
                 <div class="stat-label">Matchs créés</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-value">3</div>
+                <div class="stat-value"><?php echo $matches_enAttente; ?></div>
                 <div class="stat-label">En attente</div>
             </div>
             
@@ -73,39 +80,23 @@ $matches = $matchRepo->all();
                             </tr>
                         </thead>
                         <tbody>
+                            <?php
+                            $matches = $matchRepo->getMatchesByOrganisateur((int)$_SESSION['user_id']);
+                            foreach ($matches as $m):
+                                // $seats_sold = $matchRepo->get_sold_seats_count($m['id']);
+                            ?>
                             <tr>
-                                <td>Raja vs Wydad</td>
-                                <td>15 Jan 2026</td>
-                                <td>Casablanca</td>
-                                <td>2000</td>
-                                <td>1456</td>
-                                <td><span class="badge badge-success">Validé</span></td>
+                                <td><?php echo htmlspecialchars($m['team1_name'] . " vs " . $m['team2_name']); ?></td>
+                                <td><?php echo htmlspecialchars($m['date_match'] . " " . $m['time_match']); ?></td>
+                                <td><?php echo htmlspecialchars($m['stade_name'] . ", " . $m['stade_ville']); ?></td>
+                                <td><?php echo htmlspecialchars($m['total_seats']); ?></td>
+                                <!-- <td><?php echo htmlspecialchars($seats_sold); ?></td> -->
+                                <td><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $m['statut']))); ?></td>
                                 <td>
-                                    <button class="btn btn-primary" onclick="viewStats(1)">📊 Stats</button>
+                                    <button class="btn btn-primary" onclick="viewStats(<?php echo (int)$m['id']; ?>)">Voir stats</button>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>AS FAR vs Renaissance</td>
-                                <td>18 Jan 2026</td>
-                                <td>Rabat</td>
-                                <td>1500</td>
-                                <td>890</td>
-                                <td><span class="badge badge-success">Validé</span></td>
-                                <td>
-                                    <button class="btn btn-primary" onclick="viewStats(2)">📊 Stats</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Kawkab vs Hassania</td>
-                                <td>20 Jan 2026</td>
-                                <td>Casablanca</td>
-                                <td>1200</td>
-                                <td>0</td>
-                                <td><span class="badge badge-warning">En attente</span></td>
-                                <td>
-                                    <button class="btn btn-outline" disabled>En attente</button>
-                                </td>
-                            </tr>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
