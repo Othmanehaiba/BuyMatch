@@ -19,7 +19,7 @@ $matches = $matchRepo->all();
         <nav class="navbar">
             <div class="logo">⚽ BuyMatch</div>
             <ul class="nav-links">
-                <li><a href="../../index.php">Accueil</a></li>
+                <li><a href="stats.php">Stats</a></li>
                 <li><a href="dashboard.php">Dashboard</a></li>
                 <li><a href="create_match.php" class="btn btn-secondary">Créer un match</a></li>
                 <li><a href="../../auth/logout.php" class="btn btn-danger">Déconnexion</a></li>
