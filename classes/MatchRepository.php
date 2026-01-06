@@ -17,8 +17,25 @@ class MatchRepository{
     }
     
     public function getMatchesByOrganisateur(int $organisateur_id): array {
-        $stmt = $this->pdo->prepare("SELECT * FROM matches WHERE organisateur_id = ?");
+        $stmt = $this->pdo->prepare("SELECT m.id, e1.nom AS team1_name, e2.nom AS team2_name, s.nom AS stade_name, m.date_heure, m.duree_min, m.capacite_total, m.statut  
+                                    FROM matches m 
+                                    JOIN equipes e1 ON m.equipe_a_id = e1.id
+                                    JOIN equipes e2 ON m.equipe_b_id = e2.id
+                                    JOIN stades s ON m.stade_id = s.id
+                                    WHERE m.organisateur_id = ?");
         $stmt->execute([$organisateur_id]);
+        return $stmt->fetchAll();
+    }
+
+    public function getPendingMatches(): array {
+        $stmt = $this->pdo->prepare("SELECT m.id, u.nom as name_orga, m.created_at, e1.nom AS team1_name, e2.nom AS team2_name, s.nom AS stade_name, m.date_heure, m.duree_min, m.capacite_total, m.statut  
+                                    FROM matches m 
+                                    RIGHT JOIN equipes e1 ON m.equipe_a_id = e1.id
+                                    RIGHT JOIN equipes e2 ON m.equipe_b_id = e2.id
+                                    RIGHT JOIN stades s ON m.stade_id = s.id
+                                    RIGHT JOIN users u ON m.organisateur_id = u.id
+                                    WHERE m.statut = 'en_attente'");
+        $stmt->execute();
         return $stmt->fetchAll();
     }
 
@@ -91,5 +108,29 @@ class MatchRepository{
             VALUES (?, ?, ?, ?)
         ");
         return $stmt->execute([$match_id, $category_name, $price, $seats]);
+    }
+
+    public function getAllUsers():array{
+        $stmt = $this->pdo->prepare("SELECT id, nom, email, role, statut FROM users");
+        $stmt->execute();
+        return $stmt->fetchAll();   
+    }  
+
+    public function getNbrUsers(): int {
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM users");
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function getNbrMatches(): int {
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM matches WHERE statut = 'valide'");
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function getNbrPendingMatches(): int {
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM matches WHERE statut = 'en_attente'");
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
     }
 }
