@@ -126,6 +126,10 @@ header {
     background: var(--primary-color);
     color: var(--white);
 }
+.btn-success {
+    background: var(--secondary-color);
+    color: var(--white);
+}
 
 /* === CONTAINER & LAYOUT === */
 .container {
