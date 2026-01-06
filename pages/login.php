@@ -18,10 +18,12 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $_SESSION['user_name'] = $user['nom'];
         $_SESSION['user_role'] = $user['role'];
 
-        if($user['role'] === 'organisateur'){
+        if($user['role'] === 'organisateur' && $user['statut'] === 'actif'){
             header("Location: ../organizer/dashboard.php");
-        } else {
+        }else if($user['role'] === 'acheteur' && $user['statut'] === 'actif'){
             header("Location: home.php");
+        }else if($user['role'] === 'admin'){
+            header("Location: ../admin/dashboard.php");
         }
     } else {
         die("Email ou mot de passe incorrect");
