@@ -1,3 +1,20 @@
+<?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+require_once __DIR__ . "/../config/Database.php";
+require_once __DIR__ . "/../classes/MatchRepository.php";
+// Ensure only admin can access
+
+if(!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin'){
+    header("Location: ../../pages/login.php");
+    exit();
+}
+$mantchRepository = new MatchRepository();
+$pendingMatches = $mantchRepository->getPendingMatches();
+
+$users = $mantchRepository->getNbrUsers();
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -13,7 +30,6 @@
             <div class="logo">⚽ BuyMatch Admin</div>
             <ul class="nav-links">
                 <li><a href="dashboard.php">Dashboard</a></li>
-                <li><a href="validate_match.php">Valider matchs</a></li>
                 <li><a href="users.php">Utilisateurs</a></li>
                 <li><a href="../../auth/logout.php" class="btn btn-danger">Déconnexion</a></li>
             </ul>
@@ -27,22 +43,22 @@
         <!-- Global Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-value">245</div>
+                <div class="stat-value"><?php echo $users ?></div>
                 <div class="stat-label">Utilisateurs totaux</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-value">48</div>
+                <div class="stat-value"><?php echo $mantchRepository->getNbrMatches(); ?></div>
                 <div class="stat-label">Matchs publiés</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-value">5</div>
+                <div class="stat-value"><?php echo $mantchRepository->getNbrPendingMatches(); ?></div>
                 <div class="stat-label">En attente validation</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-value">8,456</div>
+                <div class="stat-value">TA7TA SIYANA</div>
                 <div class="stat-label">Billets vendus</div>
             </div>
         </div>
@@ -66,131 +82,25 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <?php foreach($pendingMatches as $match): ?>
                             <tr>
-                                <td>Kawkab vs Hassania</td>
-                                <td>Ahmed Bennani</td>
-                                <td>20 Jan 2026</td>
-                                <td>Casablanca</td>
-                                <td>1200</td>
-                                <td>02 Jan 2026</td>
+                                <td><?php echo htmlspecialchars($match['team1_name'] . " vs " . $match['team2_name']); ?></td>
+                                <td><?php echo htmlspecialchars($match['name_orga']); ?></td>
+                                <td><?php echo htmlspecialchars(date("d M Y H:i", strtotime($match['date_heure']))); ?></td>
+                                <td><?php echo htmlspecialchars($match['stade_name']); ?></td>
+                                <td><?php echo htmlspecialchars($match['capacite_total']); ?></td>
+                                <td><?php echo htmlspecialchars(date("d M Y", strtotime($match['created_at']))); ?></td>
                                 <td>
-                                    <button class="btn btn-secondary" onclick="approveMatch(1)">✓ Approuver</button>
-                                    <button class="btn btn-danger" onclick="rejectMatch(1)">✗ Refuser</button>
+                                    <button class="btn btn-success"><a href="validate_match.php?approve=<?php echo $match['id']; ?>">Approuver</a></button>
+                                    <button class="btn btn-danger"><a href="reject_match.php?reject=<?php echo $match['id']; ?>">Refuser</a></button>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>Olympique vs Union</td>
-                                <td>Sara Idrissi</td>
-                                <td>22 Jan 2026</td>
-                                <td>Agadir</td>
-                                <td>800</td>
-                                <td>01 Jan 2026</td>
-                                <td>
-                                    <button class="btn btn-secondary" onclick="approveMatch(2)">✓ Approuver</button>
-                                    <button class="btn btn-danger" onclick="rejectMatch(2)">✗ Refuser</button>
-                                </td>
-                            </tr>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
-
-        <!-- Users Management -->
-        <div class="card mt-3">
-            <div class="card-body">
-                <h3 class="mb-2">Gestion des utilisateurs</h3>
-                
-                <div class="filter-bar mb-2">
-                    <input type="text" class="form-control" placeholder="Rechercher un utilisateur...">
-                    <select class="form-control">
-                        <option value="">Tous les rôles</option>
-                        <option value="acheteur">Acheteur</option>
-                        <option value="organisateur">Organisateur</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                    <select class="form-control">
-                        <option value="">Tous les statuts</option>
-                        <option value="active">Actif</option>
-                        <option value="inactive">Inactif</option>
-                    </select>
-                </div>
-                
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nom</th>
-                                <th>Email</th>
-                                <th>Rôle</th>
-                                <th>Date inscription</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Mohamed Alami</td>
-                                <td>mohamed.alami@email.com</td>
-                                <td><span class="badge badge-info">Acheteur</span></td>
-                                <td>15 Déc 2025</td>
-                                <td><span class="badge badge-success">Actif</span></td>
-                                <td>
-                                    <button class="btn btn-danger" onclick="toggleUserStatus(1)">Désactiver</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Ahmed Bennani</td>
-                                <td>ahmed.bennani@email.com</td>
-                                <td><span class="badge badge-warning">Organisateur</span></td>
-                                <td>10 Déc 2025</td>
-                                <td><span class="badge badge-success">Actif</span></td>
-                                <td>
-                                    <button class="btn btn-danger" onclick="toggleUserStatus(2)">Désactiver</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Fatima Zahra</td>
-                                <td>fatima.z@email.com</td>
-                                <td><span class="badge badge-info">Acheteur</span></td>
-                                <td>05 Déc 2025</td>
-                                <td><span class="badge badge-danger">Inactif</span></td>
-                                <td>
-                                    <button class="btn btn-secondary" onclick="toggleUserStatus(3)">Activer</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- All Comments -->
-        <div class="card mt-3">
-            <div class="card-body">
-                <h3 class="mb-2">Tous les commentaires</h3>
-                
-                <div style="border-bottom: 1px solid var(--light-gray); padding: 1rem 0;">
-                    <div class="d-flex justify-between align-center mb-1">
-                        <strong>Mohamed A. - Raja vs Wydad</strong>
-                        <span style="color: var(--gray-color); font-size: 0.875rem;">Il y a 2 jours</span>
-                    </div>
-                    <p>Excellent match ! Ambiance incroyable au stade.</p>
-                    <div>⭐⭐⭐⭐⭐ 5/5</div>
-                    <button class="btn btn-danger mt-1" onclick="deleteComment(1)">Supprimer</button>
-                </div>
-                
-                <div style="border-bottom: 1px solid var(--light-gray); padding: 1rem 0;">
-                    <div class="d-flex justify-between align-center mb-1">
-                        <strong>Fatima Z. - AS FAR vs Renaissance</strong>
-                        <span style="color: var(--gray-color); font-size: 0.875rem;">Il y a 5 jours</span>
-                    </div>
-                    <p>Organisation parfaite, places confortables.</p>
-                    <div>⭐⭐⭐⭐ 4/5</div>
-                    <button class="btn btn-danger mt-1" onclick="deleteComment(2)">Supprimer</button>
-                </div>
-            </div>
-        </div>
+        </div>        
     </main>
 
     <!-- Footer -->
@@ -200,30 +110,6 @@
 
     <script src="../../assets/js/main.js"></script>
     <script>
-        function approveMatch(matchId) {
-            if (BuyMatch.confirmAction('Approuver ce match ?')) {
-                BuyMatch.showLoading();
-                // Submit form or AJAX request
-                setTimeout(function() {
-                    BuyMatch.hideLoading();
-                    BuyMatch.showAlert('Match approuvé avec succès', 'success');
-                    // Reload or update UI
-                }, 1000);
-            }
-        }
-
-        function rejectMatch(matchId) {
-            if (BuyMatch.confirmAction('Refuser ce match ?')) {
-                BuyMatch.showLoading();
-                // Submit form or AJAX request
-                setTimeout(function() {
-                    BuyMatch.hideLoading();
-                    BuyMatch.showAlert('Match refusé', 'info');
-                    // Reload or update UI
-                }, 1000);
-            }
-        }
-
         function toggleUserStatus(userId) {
             if (BuyMatch.confirmAction('Changer le statut de cet utilisateur ?')) {
                 BuyMatch.showLoading();
