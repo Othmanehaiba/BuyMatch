@@ -1,48 +1,49 @@
 <?php
-// pages/matches.php
-session_start();
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-$matches = [
-  [
-    'id' => 1,
-    'team_a' => 'Real Madrid',
-    'team_b' => 'Barcelona',
-    'logo_a' => 'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg',
-    'logo_b' => 'https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg',
-    'city' => 'Casablanca',
-    'stadium' => 'Stade Mohammed V',
-    'date' => '2026-02-10',
-    'time' => '20:00',
-    'price_from' => 80,
-    'status' => 'publie'
-  ],
-  [
-    'id' => 2,
-    'team_a' => 'Man United',
-    'team_b' => 'Liverpool',
-    'logo_a' => 'https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg',
-    'logo_b' => 'https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg',
-    'city' => 'Rabat',
-    'stadium' => 'Complexe Moulay Abdellah',
-    'date' => '2026-02-05',
-    'time' => '18:30',
-    'price_from' => 60,
-    'status' => 'publie'
-  ],
-  [
-    'id' => 3,
-    'team_a' => 'Chelsea',
-    'team_b' => 'Arsenal',
-    'logo_a' => 'https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg',
-    'logo_b' => 'https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg',
-    'city' => 'Tanger',
-    'stadium' => 'Stade Ibn Batouta',
-    'date' => '2026-02-12',
-    'time' => '17:00',
-    'price_from' => 50,
-    'status' => 'publie'
-  ],
-];
+require_once __DIR__ . "/../config/Database.php";
+require_once __DIR__ . "/../classes/MatchRepository.php";
+
+$matchRepo = new MatchRepository();
+$matches = $matchRepo->getAllValidateMatches();
+//     'team_b' => 'Barcelona',
+//     'logo_a' => 'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg',
+//     'logo_b' => 'https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg',
+//     'city' => 'Casablanca',
+//     'stadium' => 'Stade Mohammed V',
+//     'date' => '2026-02-10',
+//     'time' => '20:00',
+//     'price_from' => 80,
+//     'status' => 'publie'
+//   ],
+//   [
+//     'id' => 2,
+//     'team_a' => 'Man United',
+//     'team_b' => 'Liverpool',
+//     'logo_a' => 'https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg',
+//     'logo_b' => 'https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg',
+//     'city' => 'Rabat',
+//     'stadium' => 'Complexe Moulay Abdellah',
+//     'date' => '2026-02-05',
+//     'time' => '18:30',
+//     'price_from' => 60,
+//     'status' => 'publie'
+//   ],
+//   [
+//     'id' => 3,
+//     'team_a' => 'Chelsea',
+//     'team_b' => 'Arsenal',
+//     'logo_a' => 'https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg',
+//     'logo_b' => 'https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg',
+//     'city' => 'Tanger',
+//     'stadium' => 'Stade Ibn Batouta',
+//     'date' => '2026-02-12',
+//     'time' => '17:00',
+//     'price_from' => 50,
+//     'status' => 'publie'
+//   ],
+// ];
 ?>
 <!doctype html>
 <html lang="fr">
@@ -113,29 +114,28 @@ $matches = [
         <article
           class="card match-card"
           style="padding:14px; border-radius:14px;"
-          data-team="<?= htmlspecialchars(strtolower($m['team_a'].' '.$m['team_b'])) ?>"
-          data-city="<?= htmlspecialchars(strtolower($m['city'])) ?>"
-          data-date="<?= htmlspecialchars($m['date']) ?>"
-          data-price="<?= (int)$m['price_from'] ?>"
+          data-team="<?= htmlspecialchars(strtolower($m['team1_name'].' '.$m['team2_name'])) ?>"
+          data-city="<?= htmlspecialchars(strtolower($m['stade_name'])) ?>"
+          data-date="<?= htmlspecialchars($m['date_heure']) ?>"
         >
           <div style="display:flex; align-items:center; gap:10px;">
-            <img src="<?= htmlspecialchars($m['logo_a']) ?>" alt="Logo A" style="width:42px; height:42px; object-fit:contain;">
+            <img src="<?= htmlspecialchars($m['team1_logo']) ?>" alt="Logo A" style="width:42px; height:42px; object-fit:contain;">
             <div style="flex:1;">
               <h3 style="margin:0; font-size:18px;">
-                <?= htmlspecialchars($m['team_a']) ?> vs <?= htmlspecialchars($m['team_b']) ?>
+                <?= htmlspecialchars($m['team1_name']) ?> vs <?= htmlspecialchars($m['team2_name']) ?>
               </h3>
               <p style="margin:4px 0 0; opacity:.8;">
-                <?= htmlspecialchars($m['city']) ?> • <?= htmlspecialchars($m['stadium']) ?>
+                <?= htmlspecialchars($m['ville']) ?> • <?= htmlspecialchars($m['stade_name']) ?>
               </p>
               <p style="margin:4px 0 0; opacity:.8;">
-                <?= htmlspecialchars($m['date']) ?> • <?= htmlspecialchars($m['time']) ?>
+                <?= htmlspecialchars((new DateTime($m['date_heure']))->format('d M Y')) ?> • <?= htmlspecialchars((new DateTime($m['date_heure']))->format('H:i')) ?>
               </p>
             </div>
           </div>
 
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
             <span class="badge" style="padding:6px 10px; border-radius:999px; background:#e2e8f0;">
-              Dès <?= (int)$m['price_from'] ?> MAD
+              Dès 100 MAD
             </span>
             <a class="btn btn-primary" href="match_details.php?id=<?= (int)$m['id'] ?>">Voir détails</a>
           </div>
