@@ -201,7 +201,7 @@ class MatchRepository{
 
     public function getCommentsByMatchId(int $match_id): array {
         $stmt = $this->pdo->prepare("
-            SELECT u.nom AS user_name, a.note, a.commentaire, a.created_at
+            SELECT a.created_at, u.nom AS user_name, a.note, a.commentaire
             FROM avis a
             JOIN users u ON a.user_id = u.id
             WHERE a.match_id = ?
