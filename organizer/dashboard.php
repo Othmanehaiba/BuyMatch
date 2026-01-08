@@ -74,9 +74,9 @@ $matches_enAttente = (int)$stmt->fetchColumn();
                                 <th>Date</th>
                                 <th>Lieu</th>
                                 <th>Places</th>
-                                <th>Vendus</th>
                                 <th>Statut</th>
-                                <th>Actions</th>
+                                <!-- <th>Actions </th> -->
+                                
                             </tr>
                         </thead>
                         <tbody>
@@ -87,14 +87,14 @@ $matches_enAttente = (int)$stmt->fetchColumn();
                             ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($m['team1_name'] . " vs " . $m['team2_name']); ?></td>
-                                <td><?php echo htmlspecialchars($m['date_match'] . " " . $m['time_match']); ?></td>
-                                <td><?php echo htmlspecialchars($m['stade_name'] . ", " . $m['stade_ville']); ?></td>
-                                <td><?php echo htmlspecialchars($m['total_seats']); ?></td>
+                                <td><?php echo htmlspecialchars($m['date_heure']); ?></td>
+                                <td><?php echo htmlspecialchars($m['stade_name']); ?></td>
+                                <td><?php echo htmlspecialchars($m['capacite_total']); ?></td>
                                 <!-- <td><?php echo htmlspecialchars($seats_sold); ?></td> -->
                                 <td><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $m['statut']))); ?></td>
-                                <td>
+                                <!-- <td>
                                     <button class="btn btn-primary" onclick="viewStats(<?php echo (int)$m['id']; ?>)">Voir stats</button>
-                                </td>
+                                </td> -->
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
