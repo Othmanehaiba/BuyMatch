@@ -114,14 +114,14 @@ if(isset($_POST['submit_comment'])){
         <div class="match-header">
             <div class="teams-container">
                 <div class="team">
-                    <img src="<?= $match['team1_logo'] ?>" alt="<?= $match['team1_name'] ?>" class="team-logo" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="<?= $match['team1_logo'] ?>" alt="<?= $match['team1_name'] ?>" class="team-logo" style="width: 50%; height: 100%; object-fit: cover;">
                     <h3><?= $match['team1_name'] ?></h3>
                 </div>
                 
                 <div class="vs-text">VS</div>
                 
                 <div class="team">
-                    <img src="<?= $match['team2_logo'] ?>" alt="<?= $match['team2_name'] ?>" class="team-logo" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="<?= $match['team2_logo'] ?>" alt="<?= $match['team2_name'] ?>" class="team-logo" style="width: 50%; height: 100%; object-fit: cover;">
 
                     <h3><?= $match['team2_name'] ?></h3>
                 </div>
@@ -267,7 +267,7 @@ if(isset($_POST['submit_comment'])){
                     <div style="border-bottom: 1px solid var(--light-gray); padding: 1rem 0;">
                         <div class="d-flex justify-between align-center mb-1">
                             <strong><?= $comment['user_name'] ?></strong>
-                            <span style="color: var(--gray-color); font-size: 0.875rem;">Il y a 2 jours</span>
+                            <span style="color: var(--gray-color); font-size: 0.875rem;">Il y a <?= $comment['created_at'] ?></span>
                         </div>
                         <p><?= $comment['commentaire'] ?></p>
                         <div><?php echo str_repeat("⭐", (int)$comment['note']); ?><?php echo $comment['note']; ?> /5</div>
