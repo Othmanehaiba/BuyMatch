@@ -1,3 +1,15 @@
+<?php
+session_start();
+require_once __DIR__ . "/../config/Database.php";
+require_once __DIR__ . "/../classes/User.php";
+
+$user_id = $_SESSION['user_id'] ?? null;
+if (!$user_id) {    
+    header("Location: ../index.php");
+    exit();
+}
+$userInfos = User::getUserInfos((int)$user_id);
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -12,7 +24,7 @@
         <nav class="navbar">
             <div class="logo">⚽ BuyMatch</div>
             <ul class="nav-links">
-                <li><a href="../index.php">Accueil</a></li>
+                <li><a href="home.php">Accueil</a></li>
                 <li><a href="matches.php">Matchs</a></li>
                 <li><a href="profile.php">Mon Profil</a></li>
                 <li><a href="../auth/logout.php" class="btn btn-danger">Déconnexion</a></li>
@@ -32,15 +44,14 @@
                 <form action="profile.php" method="POST">
                     <div class="form-group">
                         <label for="nom">Nom complet</label>
-                        <input type="text" id="nom" name="nom" class="form-control" value="Mohamed Alami">
+                        <input type="text" id="nom" name="nom" class="form-control" value="<?= htmlspecialchars($userInfos[0]['nom']) ?>" disabled>
                     </div>
                     
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" id="email" name="email" class="form-control" value="mohamed.alami@email.com">
+                        <input type="email" id="email" name="email" class="form-control" value="<?= htmlspecialchars($userInfos[0]['email']) ?>" disabled>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
                 </form>
             </div>
         </div>
