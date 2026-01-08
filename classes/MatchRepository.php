@@ -133,4 +133,81 @@ class MatchRepository{
         $stmt->execute();
         return (int)$stmt->fetchColumn();
     }
+
+    public function getUpcomingMatches(): array {
+        $stmt = $this->pdo->prepare("SELECT m.id, e1.nom AS team1_name, e1.logo AS team1_logo, e2.nom AS team2_name, e2.logo AS team2_logo, s.nom AS stade_name, m.date_heure, m.duree_min, m.capacite_total, m.statut  
+                                    FROM matches m 
+                                    JOIN equipes e1 ON m.equipe_a_id = e1.id
+                                    JOIN equipes e2 ON m.equipe_b_id = e2.id
+                                    JOIN stades s ON m.stade_id = s.id
+                                    WHERE m.statut = 'en_attente' AND m.date_heure >= NOW()
+                                    ORDER BY m.date_heure ASC
+                                    LIMIT 5");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function getMatchById(int $match_id): ?array {
+        $stmt = $this->pdo->prepare("SELECT m.id, e1.nom AS team1_name, e1.logo AS team1_logo, e2.nom AS team2_name, e2.logo AS team2_logo, s.nom AS stade_name, s.ville AS stade_ville, m.date_heure, m.duree_min, m.capacite_total, m.statut, cm.nom, cm.prix, cm.capacite  
+                                    FROM matches m 
+                                    JOIN equipes e1 ON m.equipe_a_id = e1.id
+                                    JOIN equipes e2 ON m.equipe_b_id = e2.id
+                                    JOIN stades s ON m.stade_id = s.id
+                                    JOIN categories_match cm ON cm.match_id = m.id
+                                    WHERE m.id = ?");
+        $stmt->execute([$match_id]);
+        $match = $stmt->fetchAll();
+        return $match ? $match : null;
+    }
+
+    public function getPublishedMatches(): array {
+        $stmt = $this->pdo->prepare("SELECT m.id, e1.nom AS team1_name, e1.logo AS team1_logo, e2.nom AS team2_name, e2.logo AS team2_logo, s.nom AS stade_name, m.date_heure, m.duree_min, m.capacite_total, m.statut  
+                                    FROM matches m 
+                                    JOIN equipes e1 ON m.equipe_a_id = e1.id
+                                    JOIN equipes e2 ON m.equipe_b_id = e2.id
+                                    JOIN stades s ON m.stade_id = s.id
+                                    WHERE m.statut = 'valide' AND m.date_heure >= NOW()
+                                    ORDER BY m.date_heure ASC");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function insertComment(int $match_id, int $user_id, int $rating, string $comment_text) {
+        $stmt = $this->pdo->prepare("
+        SELECT id FROM avis 
+        WHERE match_id = ? AND user_id = ?
+    ");
+    $stmt->execute([$match_id, $user_id]);
+    
+    if($stmt->rowCount() > 0){
+        // Update existing comment
+        $stmt = $this->pdo->prepare("
+            UPDATE avis 
+            SET note = ?, commentaire = ?
+            WHERE match_id = ? AND user_id = ?
+        ");
+        $stmt->execute([$rating, $comment_text, $match_id, $user_id]);
+        $message = "Votre commentaire a été mis à jour.";
+    } else {
+        // Insert new comment
+        $stmt = $this->pdo->prepare("
+            INSERT INTO avis (match_id, user_id, note, commentaire) 
+            VALUES (?, ?, ?, ?)
+        ");
+        $stmt->execute([$match_id, $user_id, $rating, $comment_text]);
+        $message = "Votre commentaire a été publié.";
+    }
+    }
+
+    public function getCommentsByMatchId(int $match_id): array {
+        $stmt = $this->pdo->prepare("
+            SELECT u.nom AS user_name, a.note, a.commentaire, a.created_at
+            FROM avis a
+            JOIN users u ON a.user_id = u.id
+            WHERE a.match_id = ?
+            ORDER BY a.created_at DESC
+        ");
+        $stmt->execute([$match_id]);
+        return $stmt->fetchAll();
+    }
 }
