@@ -140,22 +140,22 @@ if(isset($_POST['submit_comment'])){
                 <h3 class="mb-2">Choisissez votre catégorie</h3>
                 
                 <div class="stats-grid">
-                    <div class="stat-card" style="cursor: pointer; border: 2px solid transparent;" onclick="selectCategory('vip')">
-                        <h4>VIP</h4>
-                        <div class="stat-value"><?= $categories[0]['prix'] ?></div>
-                        <p class="stat-label"><?= $categories[0]['capacite'] ?> places disponibles</p>
+                    <div class="stat-card" style="cursor: pointer; border: 2px solid transparent;" data-cat="<?= strtolower(htmlspecialchars($categories[0]['nom'])) ?>" onclick="selectCategory('<?= strtolower(htmlspecialchars($categories[0]['nom'])) ?>')">
+                        <h4><?= htmlspecialchars($categories[0]['nom']) ?></h4>
+                        <div class="stat-value"><?= htmlspecialchars($categories[0]['prix']) ?></div>
+                        <p class="stat-label"><?= htmlspecialchars($categories[0]['capacite']) ?> places disponibles</p>
                     </div>
                     
-                    <div class="stat-card" style="cursor: pointer; border: 2px solid transparent;" onclick="selectCategory('premium')">
-                        <h4>Premium</h4>
-                        <div class="stat-value"><?= $categories[1]['prix'] ?></div>
-                        <p class="stat-label"><?= $categories[1]['capacite'] ?> places disponibles</p>
+                    <div class="stat-card" style="cursor: pointer; border: 2px solid transparent;" data-cat="<?= strtolower(htmlspecialchars($categories[1]['nom'])) ?>" onclick="selectCategory('<?= strtolower(htmlspecialchars($categories[1]['nom'])) ?>')">
+                        <h4><?= htmlspecialchars($categories[1]['nom']) ?></h4>
+                        <div class="stat-value"><?= htmlspecialchars($categories[1]['prix']) ?></div>
+                        <p class="stat-label"><?= htmlspecialchars($categories[1]['capacite']) ?> places disponibles</p>
                     </div>
                     
-                    <div class="stat-card" style="cursor: pointer; border: 2px solid transparent;" onclick="selectCategory('standard')">
-                        <h4>Standard</h4>
-                        <div class="stat-value"><?= $categories[2]['prix'] ?></div>
-                        <p class="stat-label"><?= $categories[2]['capacite'] ?> places disponibles</p>
+                    <div class="stat-card" style="cursor: pointer; border: 2px solid transparent;" data-cat="<?= strtolower(htmlspecialchars($categories[2]['nom'])) ?>" onclick="selectCategory('<?= strtolower(htmlspecialchars($categories[2]['nom'])) ?>')">
+                        <h4><?= htmlspecialchars($categories[2]['nom']) ?></h4>
+                        <div class="stat-value"><?= htmlspecialchars($categories[2]['prix']) ?></div>
+                        <p class="stat-label"><?= htmlspecialchars($categories[2]['capacite']) ?> places disponibles</p>
                     </div>
                 </div>
             </div>
@@ -331,122 +331,135 @@ if(isset($_POST['submit_comment'])){
 
     <script src="../assets/js/main.js"></script>
     <script>
-        // Initialize seat selection
+        // Ensure BuyMatch init runs (if available)
         document.addEventListener('DOMContentLoaded', function() {
-            BuyMatch.initSeatSelection();
+            if (typeof BuyMatch !== 'undefined' && BuyMatch.initSeatSelection) {
+                BuyMatch.initSeatSelection();
+            }
         });
-
-        // Select category
-        function selectCategory(category) {
-            document.getElementById('seat-section').style.display = 'block';
-            document.getElementById('seat-section').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Complete purchase
-        function completePurchase() {
-            BuyMatch.showLoading();
-            // Simulate purchase process
-            setTimeout(function() {
-                BuyMatch.hideLoading();
-                BuyMatch.closeModal(document.getElementById('confirm-modal'));
-                BuyMatch.showAlert('Achat confirmé ! Vérifiez votre email pour le billet.', 'success');
-                // Redirect to profile or tickets page
-                // window.location.href = 'profile.php';
-            }, 2000);
-        }
     </script>
+    <!-- Server-side PDF generation will be used. -->
     <script>
     let selectedSeats = [];
     const maxSeats = 4;
+    let selectedCategoryKey = null;
+    const matchInfo = <?= json_encode($match) ?>;
 
-    // Initialize seat selection
+    <?php
+    $catMap = [];
+    foreach ($categories as $c) {
+        $catMap[strtolower($c['nom'])] = $c;
+    }
+    ?>
+    const categoriesData = <?= json_encode($catMap) ?>;
+
     document.addEventListener('DOMContentLoaded', function() {
-        // If you have BuyMatch.initSeatSelection, keep it
-        if (typeof BuyMatch !== 'undefined' && BuyMatch.initSeatSelection) {
-            BuyMatch.initSeatSelection();
-        }
-        
-        // Initialize our seat selection
-        initializeSeatSelection();
+        // Default: don't show seats until a category is chosen
+        document.getElementById('seat-section').style.display = 'none';
+        updateModalInfo();
     });
+
+    function renderSeatsForCategory(categoryKey) {
+        const container = document.querySelector('.seat-grid');
+        container.innerHTML = '';
+        const cat = categoriesData[categoryKey];
+        const capacity = parseInt(cat.capacite) || 0;
+        const perRow = 10;
+        const rows = Math.ceil(capacity / perRow);
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let count = 0;
+        for (let r = 0; r < rows; r++) {
+            for (let c = 1; c <= perRow && count < capacity; c++) {
+                count++;
+                const seatId = letters[r] + c;
+                const div = document.createElement('div');
+                div.className = 'seat';
+                div.setAttribute('data-seat-id', seatId);
+                div.innerText = seatId;
+                container.appendChild(div);
+            }
+        }
+        // Attach click handlers
+        initializeSeatSelection();
+        updateModalInfo();
+    }
 
     function initializeSeatSelection() {
         const seats = document.querySelectorAll('.seat:not(.occupied)');
-        
         seats.forEach(seat => {
-            seat.addEventListener('click', function() {
+            if (seat._clickHandler) seat.removeEventListener('click', seat._clickHandler);
+            seat._clickHandler = function() {
                 const seatId = this.getAttribute('data-seat-id');
-                
-                // Check if seat is already selected
                 if (this.classList.contains('selected')) {
-                    // Deselect the seat
                     this.classList.remove('selected');
                     selectedSeats = selectedSeats.filter(id => id !== seatId);
                 } else {
-                    // Check if max seats reached
                     if (selectedSeats.length >= maxSeats) {
                         alert('Vous pouvez sélectionner maximum ' + maxSeats + ' places.');
                         return;
                     }
-                    
-                    // Select the seat
                     this.classList.add('selected');
                     selectedSeats.push(seatId);
                 }
-                
-                // Update counter
                 updateSelectedSeatsCount();
-                
-                // Update modal
                 updateModalInfo();
-            });
+            };
+            seat.addEventListener('click', seat._clickHandler);
         });
     }
 
     function updateSelectedSeatsCount() {
-        document.getElementById('selected-seats-count').textContent = selectedSeats.length;
+        const el = document.getElementById('selected-seats-count');
+        if (el) el.textContent = selectedSeats.length;
     }
 
     function updateModalInfo() {
         if (selectedSeats.length > 0) {
             document.getElementById('modal-seats').textContent = selectedSeats.join(', ');
             document.getElementById('modal-count').textContent = selectedSeats.length + ' place(s)';
-            
-            // Calculate total (example with VIP price)
-            const pricePerSeat = <?= $categories[0]['prix'] ?>; // Adjust based on selected category
+        } else {
+            document.getElementById('modal-seats').textContent = '-';
+            document.getElementById('modal-count').textContent = '0 place(s)';
+        }
+
+        if (selectedCategoryKey && categoriesData[selectedCategoryKey]) {
+            document.getElementById('modal-category').textContent = categoriesData[selectedCategoryKey].nom;
+            const pricePerSeat = parseFloat(categoriesData[selectedCategoryKey].prix) || 0;
             const total = selectedSeats.length * pricePerSeat;
             document.getElementById('modal-total').textContent = total + ' MAD';
         }
     }
 
-    // Select category
-    function selectCategory(category) {
+    function selectCategory(categoryKey) {
+        selectedCategoryKey = categoryKey;
         document.getElementById('seat-section').style.display = 'block';
+        renderSeatsForCategory(categoryKey);
         document.getElementById('seat-section').scrollIntoView({ behavior: 'smooth' });
+        updateModalInfo();
     }
 
-    // Complete purchase
     function completePurchase() {
         if (selectedSeats.length === 0) {
             alert('Veuillez sélectionner au moins une place.');
             return;
         }
-        
-        if (typeof BuyMatch !== 'undefined' && BuyMatch.showLoading) {
-            BuyMatch.showLoading();
+
+        if (!selectedCategoryKey) {
+            alert('Veuillez sélectionner une catégorie.');
+            return;
         }
-        
-        // Simulate purchase process
-        setTimeout(function() {
-            if (typeof BuyMatch !== 'undefined') {
-                if (BuyMatch.hideLoading) BuyMatch.hideLoading();
-                if (BuyMatch.closeModal) BuyMatch.closeModal(document.getElementById('confirm-modal'));
-                if (BuyMatch.showAlert) BuyMatch.showAlert('Achat confirmé ! Vérifiez votre email pour le billet.', 'success');
-            } else {
-                alert('Achat confirmé ! Vérifiez votre email pour le billet.');
-            }
-            
-            // Mark selected seats as occupied
+
+        if (typeof BuyMatch !== 'undefined' && BuyMatch.showLoading) BuyMatch.showLoading();
+
+        try {
+            // Populate hidden form and submit to generate server-side PDF (opens in new tab)
+            document.getElementById('server_ticket_category').value = categoriesData[selectedCategoryKey].nom;
+            document.getElementById('server_ticket_seats').value = selectedSeats.join(', ');
+            document.getElementById('serverTicketForm').submit();
+
+            if (typeof BuyMatch !== 'undefined' && BuyMatch.showAlert) BuyMatch.showAlert('Achat en cours, votre billet va être téléchargé.', 'info');
+
+            // mark selected seats as occupied
             selectedSeats.forEach(seatId => {
                 const seatElement = document.querySelector(`.seat[data-seat-id="${seatId}"]`);
                 if (seatElement) {
@@ -454,15 +467,25 @@ if(isset($_POST['submit_comment'])){
                     seatElement.classList.add('occupied');
                 }
             });
-            
+
             // Reset selection
             selectedSeats = [];
             updateSelectedSeatsCount();
-            
-            // Redirect to profile or tickets page
-            // window.location.href = 'profile.php';
-        }, 2000);
+            updateModalInfo();
+
+        } finally {
+            if (typeof BuyMatch !== 'undefined' && BuyMatch.hideLoading) BuyMatch.hideLoading();
+            if (typeof BuyMatch !== 'undefined' && BuyMatch.closeModal) BuyMatch.closeModal(document.getElementById('confirm-modal'));
+        }
     }
 </script>
+
+<!-- Hidden form to request server-side PDF generation -->
+<form id="serverTicketForm" action="generate_ticket.php" method="POST" target="_blank" style="display:none;">
+    <input type="hidden" name="match_id" value="<?= (int)$match['id'] ?>">
+    <input type="hidden" name="category" id="server_ticket_category" value="">
+    <input type="hidden" name="seats" id="server_ticket_seats" value="">
+</form>
+
 </body>
 </html>

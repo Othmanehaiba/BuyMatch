@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/../config/Database.php";   
 
 class User{
     private $name;
@@ -23,5 +24,11 @@ class User{
             $stmt = $pdo->prepare("INSERT INTO acheteurs (user_id) VALUES (?)");
         }
         return $stmt->execute([$pdo->lastInsertId()]);
+    }
+     public static function getUserInfos($user_id): array {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare("SELECT id, nom, email, role FROM users WHERE id = ?");
+        $stmt->execute([$user_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

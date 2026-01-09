@@ -199,11 +199,19 @@ For complete functionality, you'll need:
 - PHPMailer (for sending ticket emails)
 - FPDF or TCPDF (for generating PDF tickets)
 
-Install via Composer:
+Install via Composer (recommended):
 ```bash
+# Install Composer if you don't have it
+sudo apt update && sudo apt install composer
+
+# Install PHPMailer for SMTP email sending
 composer require phpmailer/phpmailer
+
+# Optionally install a full PDF library (optional)
 composer require tecnickcom/tcpdf
 ```
+
+Then update `config/mail.php` with your SMTP credentials and sender address. `pages/generate_ticket.php` will use PHPMailer automatically if `vendor/autoload.php` exists.
 
 ## ✅ Checklist
 

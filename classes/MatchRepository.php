@@ -1,5 +1,5 @@
 <?php
-session_start();
+// session_start();
 require_once __DIR__ . "/../config/Database.php";
 
 class MatchRepository{
@@ -208,6 +208,19 @@ class MatchRepository{
             ORDER BY a.created_at DESC
         ");
         $stmt->execute([$match_id]);
+        return $stmt->fetchAll();
+    }
+
+    public function getAllValidateMatches(){
+        $stmt = $this->pdo->prepare("SELECT m.id, e1.nom AS team1_name, e1.logo AS team1_logo, e2.nom AS team2_name, e2.logo AS team2_logo, s.nom AS stade_name,s.ville, m.date_heure, m.duree_min, m.capacite_total, m.statut -- , cm.prix  
+                                    FROM matches m 
+                                    JOIN equipes e1 ON m.equipe_a_id = e1.id
+                                    JOIN equipes e2 ON m.equipe_b_id = e2.id
+                                    JOIN stades s ON m.stade_id = s.id
+                                   -- JOIN categories_match cm ON cm.match_id = m.id
+                                    WHERE m.statut = ? AND m.date_heure >= NOW()
+                                    ORDER BY m.date_heure ASC");
+        $stmt->execute(['valide']);
         return $stmt->fetchAll();
     }
 }
