@@ -1,6 +1,6 @@
 <?php
 
-class Ticket{
+class Ticket {
     public static function sendEmail(string $toEmail, string $toName, string $pdfFile): bool {
         // Prefer Composer autoload if available
         if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
@@ -18,6 +18,7 @@ class Ticket{
                     break;
                 }
             }
+            
             if (!$found) {
                 error_log('PHPMailer not found. Install via Composer: composer require phpmailer/phpmailer');
                 return false;

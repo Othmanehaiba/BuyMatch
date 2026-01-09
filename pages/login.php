@@ -12,18 +12,23 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
+    
 
     if($user && password_verify($password, $user['password_hash'])){
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['nom'];
         $_SESSION['user_role'] = $user['role'];
 
+
         if($user['role'] === 'organisateur' && $user['statut'] === 'actif'){
             header("Location: ../organizer/dashboard.php");
+            exit();
         }else if($user['role'] === 'acheteur' && $user['statut'] === 'actif'){
             header("Location: home.php");
+            exit();
         }else if($user['role'] === 'admin'){
             header("Location: ../admin/dashboard.php");
+            exit();
         }
     } else {
         die("Email ou mot de passe incorrect");

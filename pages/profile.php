@@ -44,62 +44,15 @@ $userInfos = User::getUserInfos((int)$user_id);
                 <form action="profile.php" method="POST">
                     <div class="form-group">
                         <label for="nom">Nom complet</label>
-                        <input type="text" id="nom" name="nom" class="form-control" value="<?= htmlspecialchars($userInfos[0]['nom']) ?>" disabled>
+                        <input style="cursor: not-allowed;" type="text" id="nom" name="nom" class="form-control" value="<?= htmlspecialchars($userInfos[0]['nom']) ?>"  disabled>
                     </div>
                     
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" id="email" name="email" class="form-control" value="<?= htmlspecialchars($userInfos[0]['email']) ?>" disabled>
+                        <input style="cursor: not-allowed;"  type="email" id="email" name="email" class="form-control" value="<?= htmlspecialchars($userInfos[0]['email']) ?>" disabled>
                     </div>
                     
                 </form>
-            </div>
-        </div>
-
-        <!-- Tickets History -->
-        <div class="card mt-3">
-            <div class="card-body">
-                <h3 class="mb-2">Historique de mes billets</h3>
-                
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Match</th>
-                                <th>Date</th>
-                                <th>Places</th>
-                                <th>Catégorie</th>
-                                <th>Prix</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Raja vs Wydad</td>
-                                <td>15 Jan 2026</td>
-                                <td>A1, A2</td>
-                                <td>VIP</td>
-                                <td>700 MAD</td>
-                                <td><span class="badge badge-success">Confirmé</span></td>
-                                <td>
-                                    <button class="btn btn-primary" onclick="downloadTicket(1)">📥 PDF</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>AS FAR vs Renaissance</td>
-                                <td>10 Jan 2026</td>
-                                <td>B5</td>
-                                <td>Standard</td>
-                                <td>100 MAD</td>
-                                <td><span class="badge badge-info">Utilisé</span></td>
-                                <td>
-                                    <button class="btn btn-outline" onclick="downloadTicket(2)">📥 PDF</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </div>
     </main>
@@ -110,16 +63,6 @@ $userInfos = User::getUserInfos((int)$user_id);
     </footer>
 
     <script src="../assets/js/main.js"></script>
-    <script>
-        function downloadTicket(ticketId) {
-            BuyMatch.showLoading();
-            // Simulate PDF download
-            setTimeout(function() {
-                BuyMatch.hideLoading();
-                BuyMatch.showAlert('Téléchargement du billet en cours...', 'success');
-                // window.location.href = 'download_ticket.php?id=' + ticketId;
-            }, 1000);
-        }
-    </script>
+    
 </body>
 </html>

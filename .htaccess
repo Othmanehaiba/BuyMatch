@@ -1,1 +1,2 @@
+# Serve custom 404 page for missing pages
 ErrorDocument 404 /404.php

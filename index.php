@@ -1,3 +1,11 @@
+<?php
+
+require_once 'classes/MatchRepository.php';
+$matchRepo = new MatchRepository();
+$matches = $matchRepo->getAllValidateMatches();
+
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -13,7 +21,7 @@
             <div class="logo">⚽ BuyMatch</div>
             <ul class="nav-links">
                 <li><a href="index.php">Accueil</a></li>
-                <li><a href="pages/matches.php">Matchs</a></li>
+                <!-- <li><a href="pages/matches.php">Matchs</a></li > -->
                 <li><a href="pages/login.php" class="btn btn-outline">Connexion</a></li>
                 <li><a href="pages/register.php" class="btn btn-primary">S'inscrire</a></li>
             </ul>
@@ -25,7 +33,7 @@
         <div class="container">
             <h1>Réservez vos places pour les meilleurs matchs</h1>
             <p>Découvrez et achetez vos billets pour les événements sportifs en quelques clics</p>
-            <a href="pages/matches.php" class="btn btn-secondary">Voir les matchs</a>
+            <a href="pages/login.php" class="btn btn-secondary">Voir les matchs</a>
         </div>
     </section>
 
@@ -52,56 +60,23 @@
 
         <!-- Matches Grid -->
         <div class="cards-grid">
-            <!-- Match Card 1 -->
+            <?php foreach ($matches as $match): ?>
             <div class="card">
                 <div class="card-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
                     ⚽ Match
                 </div>
                 <div class="card-body">
-                    <h3 class="card-title">Raja vs Wydad</h3>
-                    <p class="card-text">📍 Stade Mohammed V, Casablanca</p>
-                    <p class="card-text">📅 15 Janvier 2026 - 20:00</p>
+                    <h3 class="card-title"><?php echo htmlspecialchars($match['team1_name']);?> VS <?php echo htmlspecialchars($match['team2_name']); ?></h3>
+                    <p class="card-text">📍 <?php echo htmlspecialchars($match['location']); ?></p>
+                    <p class="card-text">📅 <?php echo htmlspecialchars($match['date_heure']); ?></p>
                     <div class="card-footer">
                         <span class="badge badge-success">Disponible</span>
-                        <span style="font-weight: bold; color: var(--primary-color);">À partir de 150 MAD</span>
-                    </div>
-                    <a href="pages/match_details.php?id=1" class="btn btn-primary w-100 mt-2">Voir détails</a>
-                </div>
-            </div>
-
-            <!-- Match Card 2 -->
-            <div class="card">
-                <div class="card-image" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
-                    ⚽ Match
-                </div>
-                <div class="card-body">
-                    <h3 class="card-title">AS FAR vs Renaissance</h3>
-                    <p class="card-text">📍 Complexe Prince Moulay Abdellah, Rabat</p>
-                    <p class="card-text">📅 18 Janvier 2026 - 18:00</p>
-                    <div class="card-footer">
-                        <span class="badge badge-warning">Peu de places</span>
                         <span style="font-weight: bold; color: var(--primary-color);">À partir de 100 MAD</span>
                     </div>
-                    <a href="pages/match_details.php?id=2" class="btn btn-primary w-100 mt-2">Voir détails</a>
+                    <a href="pages/login.php" class="btn btn-primary w-100 mt-2">Voir détails</a>
                 </div>
             </div>
-
-            <!-- Match Card 3 -->
-            <div class="card">
-                <div class="card-image" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
-                    ⚽ Match
-                </div>
-                <div class="card-body">
-                    <h3 class="card-title">Kawkab vs Hassania</h3>
-                    <p class="card-text">📍 Stade Père Jégo, Casablanca</p>
-                    <p class="card-text">📅 20 Janvier 2026 - 19:30</p>
-                    <div class="card-footer">
-                        <span class="badge badge-success">Disponible</span>
-                        <span style="font-weight: bold; color: var(--primary-color);">À partir de 80 MAD</span>
-                    </div>
-                    <a href="pages/match_details.php?id=3" class="btn btn-primary w-100 mt-2">Voir détails</a>
-                </div>
-            </div>
+            <?php endforeach; ?>
         </div>
     </main>
 
